@@ -5,6 +5,7 @@ import app.userservice.Payloads.APIResponse;
 import app.userservice.Payloads.AppConstants;
 import app.userservice.Payloads.UserResponse;
 import app.userservice.Services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
 
     @PostMapping("/createUser")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
@@ -26,7 +28,7 @@ public class UserController {
     }
 
     @PutMapping("/updateUser/{userId}")
-    public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable String userId) {
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user, @PathVariable String userId) {
         User updatedUser = this.userService.updateUser(user, userId);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
