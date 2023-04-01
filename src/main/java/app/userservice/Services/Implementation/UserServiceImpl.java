@@ -3,9 +3,13 @@ package app.userservice.Services.Implementation;
 import app.userservice.Entity.User;
 import app.userservice.Exceptions.EmailAlreadyExistsException;
 import app.userservice.Exceptions.ResourceNotFoundException;
+import app.userservice.Payloads.UserResponse;
 import app.userservice.Repository.UserRepository;
 import app.userservice.Services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +25,10 @@ public class UserServiceImpl implements UserService {
     public User createUser(User user) {
         String userID = UUID.randomUUID().toString();
         user.setUserId(userID);
-        if(!userRepository.existsByEmail(user.getEmail())){
+        if (!userRepository.existsByEmail(user.getEmail())) {
             User savedUser = this.userRepository.save(user);
             return savedUser;
-        }
-        else {
+        } else {
             throw new EmailAlreadyExistsException("Email already exists!");
         }
 
@@ -56,5 +59,25 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(String userId) {
         User deletedUser = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
         this.userRepository.delete(deletedUser);
+    }
+
+    @Override
+    public User searchUserByEmail(String email) {
+        User searchUser = this.userRepository.findByEmail(email);
+        return searchUser;
+    }
+
+    @Override
+    public UserResponse getAllUsersWithPaginationAndSorting(int pageNumber, int pageSize, String sortBy) {
+        Page<User> users = this.userRepository.findAll(PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).ascending()));
+        List<User> userList = users.stream().toList();
+        UserResponse userResponse = new UserResponse();
+        userResponse.setContent(userList);
+        userResponse.setPageNumber(users.getNumber());
+        userResponse.setPageSize(users.getSize());
+        userResponse.setTotalElements(users.getTotalElements());
+        userResponse.setTotalPages(users.getTotalPages());
+        userResponse.setLastPage(users.isLast());
+        return userResponse;
     }
 }
