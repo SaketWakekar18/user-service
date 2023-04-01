@@ -51,8 +51,8 @@ public class UserController {
         return new ResponseEntity(new APIResponse("User deleted Successfully!!", true, HttpStatus.GONE), HttpStatus.OK);
     }
 
-    @GetMapping("searchUser/{email}")
-    public ResponseEntity<User> searchUser(@PathVariable String email) {
+    @GetMapping("/searchUser")
+    public ResponseEntity<User> searchUser(@RequestParam String email) {
         User searchUser = this.userService.searchUserByEmail(email);
         return ResponseEntity.ok(searchUser);
     }
