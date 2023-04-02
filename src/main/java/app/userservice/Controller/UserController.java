@@ -6,7 +6,6 @@ import app.userservice.Payloads.AppConstants;
 import app.userservice.Payloads.UserResponse;
 import app.userservice.Services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ public class UserController {
     }
 
     @PutMapping("/updateUser/{userId}")
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user, @PathVariable String userId) {
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user, @PathVariable int userId) {
         User updatedUser = this.userService.updateUser(user, userId);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
@@ -40,13 +39,13 @@ public class UserController {
     }
 
     @GetMapping("/getUserByID/{userId}")
-    public ResponseEntity<User> getUserByID(@PathVariable String userId) {
+    public ResponseEntity<User> getUserByID(@PathVariable int userId) {
         User userByID = this.userService.getUserByID(userId);
         return ResponseEntity.ok(userByID);
     }
 
     @DeleteMapping("/deleteUser/{userId}")
-    public ResponseEntity<APIResponse> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<APIResponse> deleteUser(@PathVariable int userId) {
         this.userService.deleteUser(userId);
         return new ResponseEntity(new APIResponse("User deleted Successfully!!", true, HttpStatus.GONE), HttpStatus.OK);
     }

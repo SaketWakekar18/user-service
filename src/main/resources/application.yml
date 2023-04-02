@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: user-service
   datasource:
     url: jdbc:mysql://localhost:3306/user_service_microservices
     username: root
@@ -12,3 +14,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8083/eureka

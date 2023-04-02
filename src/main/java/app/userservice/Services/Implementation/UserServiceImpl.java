@@ -23,8 +23,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        String userID = UUID.randomUUID().toString();
-        user.setUserId(userID);
         if (!userRepository.existsByEmail(user.getEmail())) {
             User savedUser = this.userRepository.save(user);
             return savedUser;
@@ -35,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(User user, String userId) {
+    public User updateUser(User user, int userId) {
         User getUser = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
         getUser.setName(user.getName());
         getUser.setEmail(user.getEmail());
@@ -51,12 +49,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByID(String userId) {
+    public User getUserByID(int userId) {
         return this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
     }
 
     @Override
-    public void deleteUser(String userId) {
+    public void deleteUser(int userId) {
         User deletedUser = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
         this.userRepository.delete(deletedUser);
     }
