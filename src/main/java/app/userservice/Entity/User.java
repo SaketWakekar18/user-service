@@ -2,9 +2,7 @@ package app.userservice.Entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -19,7 +17,8 @@ import java.util.List;
 @Builder
 public class User {
     @Id
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int userId;
     @NotEmpty
     @Size(min = 5, message = "Name must be of atleast 5 characters")
     private String name;

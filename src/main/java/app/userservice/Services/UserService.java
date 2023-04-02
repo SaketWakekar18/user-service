@@ -8,13 +8,13 @@ import java.util.List;
 public interface UserService {
     User createUser(User user);
 
-    User updateUser(User user, String userId);
+    User updateUser(User user, int userId);
 
     List<User> getAllUsers();
 
-    User getUserByID(String userId);
+    User getUserByID(int userId);
 
-    void deleteUser(String userId);
+    void deleteUser(int userId);
 
     User searchUserByEmail(String email);
 
