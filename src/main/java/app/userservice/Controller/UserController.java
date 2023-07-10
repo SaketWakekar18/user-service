@@ -5,6 +5,7 @@ import app.userservice.Payloads.APIResponse;
 import app.userservice.Payloads.AppConstants;
 import app.userservice.Payloads.UserResponse;
 import app.userservice.Services.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    int retryCount = 1;
 
     @PostMapping("/createUser")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
@@ -38,10 +40,27 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
+    //@CircuitBreaker(name = "ratingHotelBreaker", fallbackMethod = "ratingHotelFallback")
+    //@Retry(name = "ratingHotelService", fallbackMethod = "ratingHotelFallback")
+    //@RateLimiter(name = "userRateLimiter", fallbackMethod = "ratingHotelFallback")
     @GetMapping("/getUserByID/{userId}")
     public ResponseEntity<User> getUserByID(@PathVariable int userId) {
+        System.out.println("Retry Count :" + retryCount);
+        retryCount++;
         User userByID = this.userService.getUserByID(userId);
         return ResponseEntity.ok(userByID);
+    }
+
+    public ResponseEntity<User> ratingHotelFallback(int userId, Exception ex) {
+        ex.printStackTrace();
+        System.out.println("This service is down: " + ex.getMessage());
+        User user = User.builder()
+                .userId(10)
+                .email("dummy@gmail.com")
+                .name("Dummy")
+                .about("This is a dummy entry")
+                .build();
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @DeleteMapping("/deleteUser/{userId}")

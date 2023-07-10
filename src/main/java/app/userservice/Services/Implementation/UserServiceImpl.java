@@ -1,8 +1,12 @@
 package app.userservice.Services.Implementation;
 
+import app.userservice.Entity.Hotels;
+import app.userservice.Entity.Rating;
 import app.userservice.Entity.User;
 import app.userservice.Exceptions.EmailAlreadyExistsException;
 import app.userservice.Exceptions.ResourceNotFoundException;
+import app.userservice.External.Services.HotelService;
+import app.userservice.External.Services.RatingService;
 import app.userservice.Payloads.UserResponse;
 import app.userservice.Repository.UserRepository;
 import app.userservice.Services.UserService;
@@ -11,15 +15,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
+    private final HotelService hotelService;
+    private final RatingService ratingService;
 
     @Override
     public User createUser(User user) {
@@ -29,7 +39,6 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new EmailAlreadyExistsException("Email already exists!");
         }
-
     }
 
     @Override
@@ -50,7 +59,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByID(int userId) {
-        return this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with given ID not found on server " + userId));
+        Rating[] userRatings = restTemplate.getForObject("http://rating-service/ratings/ratingsByUser/" + user.getUserId(), Rating[].class);
+        List<Rating> ratings = Arrays.stream(userRatings).toList();
+        List<Rating> ratingList = ratings.stream().map(rating -> {
+//            ResponseEntity<Hotels> hotelsList = restTemplate.getForEntity("http://hotel-service/hotels/getHotelsByID/" + rating.getHotelId(), Hotels.class);
+//            Hotels body = hotelsList.getBody();
+            Hotels body = this.hotelService.getHotels(rating.getHotelId());
+            rating.setHotels(body);
+            return rating;
+        }).collect(Collectors.toList());
+        user.getRatings().addAll(ratingList);
+        return user;
     }
 
     @Override
@@ -61,8 +81,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User searchUserByEmail(String email) {
-        User searchUser = this.userRepository.findByEmail(email);
-        return searchUser;
+        User user = this.userRepository.findByEmail(email);
+//        ArrayList<Rating> userRatings = restTemplate.getForObject("http://localhost:8082/ratings/ratingsByUser/" + user.getUserId(), ArrayList.class);
+//        user.setRatings(userRatings);
+        return user;
     }
 
     @Override
